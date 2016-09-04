@@ -93,46 +93,47 @@ public class PlayersResource {
     @Transactional
     @Path("/{playerId}")
     public Response putPLayer(
+            @HeaderParam(HttpHeaders.IF_UNMODIFIED_SINCE) Timestamp lastModified,
             @PathParam("playerId") int id,
-            @Valid Player player,
-            @Context Request request) {
-
+            @Valid Player player) {
 
         Optional<PlayerEntity> playerOptional = playerDao.findById(id);
 
         if(playerOptional.isPresent()) {
 
             PlayerEntity playerEntity = playerOptional.get();
+            Timestamp playerLastModified = playerEntity.getLastModified();
 
-            Date date = timestampToDate(playerEntity.getLastModified());
+            Optional<ResponseBuilder> preconditionsResponseBuilderOptional = evaluatePreconditions(lastModified, playerLastModified);
 
-            ResponseBuilder preconditionResponseBuilder = request.evaluatePreconditions(date);
-
-            if(preconditionResponseBuilder == null) {
+            if(!preconditionsResponseBuilderOptional.isPresent()) {
                 playerDao.update(player);
                 return Response.ok().build();
             } else {
-                return preconditionResponseBuilder.build();
+                return preconditionsResponseBuilderOptional.get().build();
             }
-
-             /*   Timestamp validLastModified = playerEntity.getLastModified();
-                String validETag = playerEntity.toPlayer().hashCode();
-                if(arePreconditionsMatched(lastModified, validLastModified, eTag, validETag)) {
-
-                } else {
-                    return Response.status(Response.Status.PRECONDITION_FAILED).build();
-                }
-            } else {
-                return Response.status(Response.Status.FORBIDDEN).build();
-            }*/
         } else {
             return Response.status(Response.Status.BAD_REQUEST)
-                           .entity(new Error("Player has not been found")).build();
+                    .entity(new Error("Player has not been found")).build();
         }
     }
 
-    private boolean arePreconditionsMatched(Timestamp sentLastModified, Timestamp lastModified, String sentETag, String eTag) {
-        return sentETag.equals(eTag) && sentLastModified.compareTo(lastModified) == 0;
+    private Optional<ResponseBuilder> evaluatePreconditions(Timestamp sentLastModified, Timestamp lastModified) {
+
+        if(sentLastModified != null) {
+
+            if(arePreconditionsMatched(sentLastModified, lastModified)) {
+                return Optional.empty();
+            } else {
+                return Optional.of(Response.status(Response.Status.PRECONDITION_FAILED));
+            }
+        } else {
+            return Optional.of(Response.status(Response.Status.FORBIDDEN));
+        }
+    }
+
+    private boolean arePreconditionsMatched(Timestamp sentLastModified, Timestamp lastModified) {
+        return sentLastModified.compareTo(lastModified) == 0;
     }
 
     private Date timestampToDate(Timestamp timestamp) {
