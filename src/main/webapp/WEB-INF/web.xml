@@ -13,8 +13,23 @@
             <param-name>javax.ws.rs.Application</param-name>
             <param-value>org.tiwpr.szymie.Main</param-value>
         </init-param>-->
+        <init-param>
+            <param-name>jersey.config.beanValidation.enableOutputValidationErrorEntity.server</param-name>
+            <param-value>true</param-value>
+        </init-param>
         <load-on-startup>1</load-on-startup>
+
     </servlet>
+
+    <!--<filter>
+        <filter-name>eTagFilter</filter-name>
+        <filter-class>org.springframework.web.filter.ShallowEtagHeaderFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>eTagFilter</filter-name>
+        <url-pattern>*/webapi/*</url-pattern>
+    </filter-mapping>-->
+
     <servlet-mapping>
         <servlet-name>Jersey Web Application</servlet-name>
         <url-pattern>/webapi/*</url-pattern>

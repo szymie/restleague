@@ -1,29 +1,48 @@
 package org.tiwpr.szymie.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import org.tiwpr.szymie.models.validators.DatePattern;
 
-import java.util.Date;
+import javax.validation.Valid;
+import javax.validation.constraints.*;
 
 public class Player {
 
     private int id;
+
+    @NotNull(message = "{player.firstName.null}")
+    @Size(min = 1, max = 40, message = "{player.firstName.length}")
     private String firstName;
+
+    @NotNull(message = "{player.lastName.null}")
+    @Size(min = 1, max = 40, message = "{player.lastName.length}")
     private String lastName;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private Date dateOfBirth;
+
+    @NotNull(message = "{player.dateOfBirth.null}")
+    @DatePattern(regexp = "dd-MM-yyyy", message = "{player.dateOfBirth.pattern}")
+    private String dateOfBirth;
+
+    @DecimalMin("1")
+    @DecimalMax("999")
     private int height;
+
+    @NotNull(message = "{player.foot.null}")
+    @Pattern(regexp = "right|left|both|unknown", message = "{player.foot.pattern}")
     private String foot;
+
+    @Valid
     @JsonSerialize(using = ToStringSerializer.class)
     private Position position;
+
+    @Valid
     @JsonSerialize(using = ToStringSerializer.class)
     private Country country;
 
     public Player() {
     }
 
-    public Player(int id, String firstName, String lastName, Date dateOfBirth, int height, String foot, Position position, Country country) {
+    public Player(int id, String firstName, String lastName, String dateOfBirth, int height, String foot, Position position, Country country) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -58,11 +77,11 @@ public class Player {
         this.lastName = lastName;
     }
 
-    public Date getDateOfBirth() {
+    public String getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(Date dateOfBirth) {
+    public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 

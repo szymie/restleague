@@ -3,6 +3,10 @@ package org.tiwpr.szymie.entities;
 import org.tiwpr.szymie.models.Player;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity
@@ -26,6 +30,8 @@ public class PlayerEntity {
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @JoinColumn(name = "country_id")
     private CountryEntity country;
+    @Column(name = "last_modified")
+    private Timestamp lastModified;
 
     public int getId() {
         return id;
@@ -91,18 +97,53 @@ public class PlayerEntity {
         this.country = country;
     }
 
+    public Timestamp getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(Timestamp lastModified) {
+        this.lastModified = lastModified;
+    }
+
     public Player toPlayer() {
+
+        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
         Player player = new Player();
         player.setId(id);
         player.setFirstName(firstName);
         player.setLastName(lastName);
-        player.setDateOfBirth(dateOfBirth);
+        player.setDateOfBirth(dateFormat.format(dateOfBirth));
         player.setHeight(height);
         player.setFoot(foot);
         player.setPosition(position.toPosition());
         player.setCountry(country.toCountry());
 
         return player;
+    }
+
+    public static PlayerEntity fromPlayer(Player player) {
+
+        PlayerEntity playerEntity = new PlayerEntity();
+
+        playerEntity.setId(player.getId());
+        playerEntity.setFirstName(player.getFirstName());
+        playerEntity.setLastName(player.getLastName());
+        playerEntity.setDateOfBirth(dateFromString(player.getDateOfBirth()));
+        playerEntity.setHeight(player.getHeight());
+        playerEntity.setFoot(player.getFoot());
+
+        return playerEntity;
+    }
+
+    private static Date dateFromString(String date) {
+
+        DateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+
+        try {
+            return format.parse(date);
+        } catch (ParseException e) {
+            return null;
+        }
     }
 }

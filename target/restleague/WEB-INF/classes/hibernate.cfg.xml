@@ -3,7 +3,7 @@
         "-//Hibernate/Hibernate Configuration DTD//EN"
         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
-    <session-factory>
+    <entityManager-factory>
 
         <property name="connection.url">jdbc:mysql://localhost:3306/rest_league?serverTimezone=UTC</property>
         <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
@@ -25,5 +25,5 @@
         <mapping class="org.tiwpr.szymie.entities.PoeKeyEntity" />
 
 
-    </session-factory>
+    </entityManager-factory>
 </hibernate-configuration>

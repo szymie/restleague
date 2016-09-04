@@ -2,13 +2,14 @@ package org.tiwpr.szymie.daos;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.tiwpr.szymie.KeysGenerator;
 import org.tiwpr.szymie.entities.PoeKeyEntity;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.Optional;
 
-@Component
+@Repository
 public class PoeKeyDao {
 
     @PersistenceContext
