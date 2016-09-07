@@ -1,8 +1,8 @@
 package org.tiwpr.szymie.daos;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.tiwpr.szymie.entities.BaseEntity;
 import org.tiwpr.szymie.entities.CountryEntity;
 import org.tiwpr.szymie.entities.PlayerEntity;
 import org.tiwpr.szymie.entities.PositionEntity;
@@ -10,12 +10,7 @@ import org.tiwpr.szymie.models.Player;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -34,6 +29,29 @@ public class PlayerDao {
         return Optional.ofNullable(playerEntity);
     }
 
+    public List<Player> findValidByClubId(int id, int offset, int limit) {
+        return findByClubId(id, true, offset, limit);
+    }
+
+    private List<Player> findByClubId(int id, boolean valid, int offset, int limit) {
+
+        TypedQuery<PlayerEntity> query = entityManager.createQuery("select distinct m.player from MembershipEntity m where m.club.id = :club and m.valid = :valid", PlayerEntity.class);
+
+        query.setParameter("club", id);
+        query.setParameter("valid", valid);
+
+        query.setFirstResult(offset);
+        query.setMaxResults(limit);
+
+        List<PlayerEntity> list = query.getResultList();
+
+        return list.stream().map(PlayerEntity::toModel).collect(Collectors.toList());
+    }
+
+    public List<Player> findNotValidByClubId(int id, int offset, int limit) {
+        return findByClubId(id, false, offset, limit);
+    }
+
     public List<Player> findAll(int offset, int limit) {
 
         TypedQuery<PlayerEntity> query = entityManager.createQuery("from PlayerEntity", PlayerEntity.class);
@@ -43,17 +61,19 @@ public class PlayerDao {
 
         List<PlayerEntity> list = query.getResultList();
 
-        return list.stream().map(PlayerEntity::toPlayer).collect(Collectors.toList());
+        return list.stream().map(PlayerEntity::toModel).collect(Collectors.toList());
     }
 
-    public void save(Player player) {
+    public int save(Player player) {
 
-        PlayerEntity playerEntity = PlayerEntity.fromPlayer(player);
+        PlayerEntity playerEntity = PlayerEntity.fromModel(player);
 
         fillPositionForPlayer(player, playerEntity);
         fillCountryForPlayer(player, playerEntity);
 
         entityManager.persist(playerEntity);
+
+        return playerEntity.getId();
     }
 
     private void fillPositionForPlayer(Player player, PlayerEntity playerEntity) {
@@ -80,17 +100,6 @@ public class PlayerDao {
         }
     }
 
-    private Date dateFromString(String date) {
-
-        DateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-
-        try {
-            return format.parse(date);
-        } catch (ParseException e) {
-            return null;
-        }
-    }
-
     public void update(Player player) {
 
         Optional<PlayerEntity> playerEntityOptional = findById(player.getId());
@@ -101,15 +110,20 @@ public class PlayerDao {
 
             playerEntity.setFirstName(player.getFirstName());
             playerEntity.setLastName(player.getLastName());
-            playerEntity.setDateOfBirth(dateFromString(player.getDateOfBirth()));
+            playerEntity.setDateOfBirth(BaseEntity.dateFromString(player.getDateOfBirth()));
             playerEntity.setHeight(player.getHeight());
             playerEntity.setFoot(player.getFoot());
 
             fillPositionForPlayer(player, playerEntity);
             fillCountryForPlayer(player, playerEntity);
 
+            playerEntity.setLastModified(null);
+
             entityManager.persist(playerEntity);
         }
     }
 
+    public void delete(int id) {
+        findById(id).ifPresent(entityManager::remove);
+    }
 }

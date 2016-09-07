@@ -7,8 +7,9 @@ import org.tiwpr.szymie.models.validators.DatePattern;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 
-public class Player {
+public class Player implements Model {
 
+    @DecimalMin("0")
     private int id;
 
     @NotNull(message = "{player.firstName.null}")

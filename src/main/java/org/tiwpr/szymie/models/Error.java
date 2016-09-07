@@ -2,7 +2,7 @@ package org.tiwpr.szymie.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Error {
+public class Error implements Model {
 
     @JsonProperty("error")
     private String message;

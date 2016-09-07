@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-public class Position {
+public class Position implements Model {
 
     @NotNull(message = "{position.name.null}")
     @Size(min = 1, max = 10, message = "{position.name.length}")

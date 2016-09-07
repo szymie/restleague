@@ -5,13 +5,12 @@ import org.tiwpr.szymie.models.Player;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity
 @Table(name = "players")
-public class PlayerEntity {
+public class PlayerEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -105,7 +104,7 @@ public class PlayerEntity {
         this.lastModified = lastModified;
     }
 
-    public Player toPlayer() {
+    public Player toModel() {
 
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
@@ -122,7 +121,7 @@ public class PlayerEntity {
         return player;
     }
 
-    public static PlayerEntity fromPlayer(Player player) {
+    public static PlayerEntity fromModel(Player player) {
 
         PlayerEntity playerEntity = new PlayerEntity();
 
@@ -134,16 +133,5 @@ public class PlayerEntity {
         playerEntity.setFoot(player.getFoot());
 
         return playerEntity;
-    }
-
-    private static Date dateFromString(String date) {
-
-        DateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-
-        try {
-            return format.parse(date);
-        } catch (ParseException e) {
-            return null;
-        }
     }
 }

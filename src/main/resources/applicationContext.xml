@@ -37,6 +37,13 @@
 
     <bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper" />
 
+    <bean id="taskExecutor"
+          class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="5" />
+        <property name="maxPoolSize" value="10" />
+        <property name="WaitForTasksToCompleteOnShutdown" value="true" />
+    </bean>
+
     <tx:annotation-driven transaction-manager="transactionManager" />
 
     <context:component-scan base-package="org.tiwpr.szymie" />
