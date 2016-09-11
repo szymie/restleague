@@ -85,4 +85,22 @@ public class FixturesSubResource extends BaseResource {
             }
         }
     }
+
+    @DELETE
+    @Path("{fixtureId}")
+    @Transactional
+    public Response deletePlayer(
+            @PathParam("seasonId") int seasonId,
+            @PathParam("leagueId") int leagueId,
+            @PathParam("fixtureId") int fixtureId) {
+
+        Optional<Error> errorOptional = fixtureUseCase.removeFixtureFromLeagueAtSeason(fixtureId, leagueId, seasonId);
+
+        if(errorOptional.isPresent()) {
+            Error error = errorOptional.get();
+            return Response.status(Response.Status.CONFLICT).entity(error).build();
+        } else {
+            return Response.noContent().build();
+        }
+    }
 }

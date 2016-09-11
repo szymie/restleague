@@ -30,7 +30,7 @@ public class FixtureUseCase {
 
     public SaveResult addFixtureToLeagueAtSeason(Fixture fixture, int leagueId, int seasonId) {
 
-        Optional<Error> errorOptional = validateFixture(fixture, leagueId, seasonId);
+        Optional<Error> errorOptional = validateAddFixture(fixture, leagueId, seasonId);
 
         if(errorOptional.isPresent()) {
             return new SaveResult(errorOptional.get());
@@ -41,16 +41,16 @@ public class FixtureUseCase {
         return new SaveResult(fixtureId);
     }
 
-    private Optional<Error> validateFixture(Fixture fixture, int leagueId, int seasonId) {
+    private Optional<Error> validateAddFixture(Fixture fixture, int leagueId, int seasonId) {
 
-        Optional<Error> errorOptional = validateEntitiesExistence(fixture, leagueId, seasonId);
+        Optional<Error> errorOptional = validateAddEntitiesExistence(fixture, leagueId, seasonId);
 
         if(errorOptional.isPresent()) {
             return errorOptional;
         }
 
         if(seasonUseCase.isSeasonCompleted(seasonId)) {
-            return Optional.of(new Error("It not possible to add fixture to completed season"));
+            return Optional.of(new Error("It is not possible to add fixture to completed season"));
         }
 
         if(!areClubsBoundWithLeagueAtSeason(fixture, leagueId, seasonId)) {
@@ -61,12 +61,12 @@ public class FixtureUseCase {
             return Optional.of(new Error("Home and away club cannot be the same"));
         }
 
-        //taki mecz został już rozegrany (z taką kombinacją klubu home i away)
+        //TODO - taki mecz został już rozegrany (z taką kombinacją klubu home i away)
 
         return Optional.empty();
     }
 
-    private Optional<Error> validateEntitiesExistence(Fixture fixture, int leagueId, int seasonId) {
+    private Optional<Error> validateAddEntitiesExistence(Fixture fixture, int leagueId, int seasonId) {
 
         if(!seasonDao.findById(seasonId).isPresent()) {
             return Optional.of(new Error("Season has not been found"));
@@ -91,5 +91,46 @@ public class FixtureUseCase {
     private boolean areClubsBoundWithLeagueAtSeason(Fixture fixture, int leagueId, int seasonId) {
         return clubLeagueSeasonUseCase.isClubBoundWithLeagueAtSeason(fixture.getHomeClubId(), leagueId, seasonId) &&
                 clubLeagueSeasonUseCase.isClubBoundWithLeagueAtSeason(fixture.getAwayClubId(), leagueId, seasonId);
+    }
+
+    public Optional<Error> removeFixtureFromLeagueAtSeason(int fixtureId, int leagueId, int seasonId) {
+
+        Optional<Error> errorOptional = validateRemoveFixture(fixtureId, leagueId, seasonId);
+
+        if(errorOptional.isPresent()) {
+            return errorOptional;
+        }
+
+        fixturesDao.delete(fixtureId);
+
+        return Optional.empty();
+    }
+
+    private Optional<Error> validateRemoveFixture(int fixtureId, int leagueId, int seasonId) {
+
+        Optional<Error> errorOptional = validateRemoveEntitiesExistence(fixtureId, leagueId, seasonId);
+
+        if(errorOptional.isPresent()) {
+            return errorOptional;
+        }
+
+        if(seasonUseCase.isSeasonCompleted(seasonId)) {
+            return Optional.of(new Error("It is not possible to remove fixture from completed season"));
+        }
+
+        return Optional.empty();
+    }
+
+    private Optional<Error> validateRemoveEntitiesExistence(int fixtureId, int leagueId, int seasonId) {
+
+        if(!seasonDao.findById(seasonId).isPresent()) {
+            return Optional.of(new Error("Season has not been found"));
+        }
+
+        if(!leagueDao.findById(leagueId).isPresent()) {
+            return Optional.of(new Error("League has not been found"));
+        }
+
+        return Optional.empty();
     }
 }

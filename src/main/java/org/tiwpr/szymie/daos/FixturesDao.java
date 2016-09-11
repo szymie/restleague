@@ -56,4 +56,7 @@ public class FixturesDao {
         return fixtureEntity.getId();
     }
 
+    public void delete(int id) {
+        findById(id).ifPresent(entityManager::remove);
+    }
 }
