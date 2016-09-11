@@ -3,13 +3,16 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="
        http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/tx
-        http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+        http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task-3.1.xsd">
 
     <bean id="keysGenerator" class="org.tiwpr.szymie.KeysGenerator">
         <constructor-arg value="10" />
@@ -48,4 +51,7 @@
 
     <context:component-scan base-package="org.tiwpr.szymie" />
 
+    <task:annotation-driven executor="asyncExecutor" />
+    <task:executor id="asyncExecutor" pool-size="10" queue-capacity="11" />
+    <bean id="exceptionHandler" class="org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler" />
 </beans>

@@ -9,7 +9,6 @@ public class PlayerId {
     @NotNull(message = "{playerId.null}")
     private int playerId;
 
-
     public PlayerId() {
     }
 

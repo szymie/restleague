@@ -3,6 +3,7 @@ package org.tiwpr.szymie.entities;
 import org.tiwpr.szymie.models.Transfer;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Entity
@@ -24,6 +25,8 @@ public class TransferEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "destination_club_id")
     private ClubEntity destinationClub;
+    @Column(name = "last_modified")
+    private Timestamp lastModified;
 
     public int getId() {
         return id;
@@ -79,6 +82,14 @@ public class TransferEntity extends BaseEntity {
 
     public void setDestinationClub(ClubEntity destinationClub) {
         this.destinationClub = destinationClub;
+    }
+
+    public Timestamp getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(Timestamp lastModified) {
+        this.lastModified = lastModified;
     }
 
     public Transfer toModel() {
