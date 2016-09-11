@@ -26,6 +26,8 @@ public class SeasonsResource extends BaseResource {
     private SeasonDao seasonDao;
     @Autowired
     private LeaguesClubsSubResource leaguesClubsSubResource;
+    @Autowired
+    private FixturesSubResource fixturesSubResource;
 
     @GET
     @Transactional
@@ -126,5 +128,10 @@ public class SeasonsResource extends BaseResource {
     @Path("/{seasonId}/leagues/{leagueId}/clubs")
     public LeaguesClubsSubResource leagueClubs() {
         return leaguesClubsSubResource;
+    }
+
+    @Path("/{seasonId}/leagues/{leagueId}/fixtures")
+    public FixturesSubResource leagueFixtures() {
+        return fixturesSubResource;
     }
 }

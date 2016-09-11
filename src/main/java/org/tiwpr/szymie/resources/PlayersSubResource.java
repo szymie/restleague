@@ -95,11 +95,8 @@ public class PlayersSubResource extends BaseResource {
             Optional<PlayerEntity> playerEntityOptional = playerDao.findById(playerId);
 
             if(playerEntityOptional.isPresent()) {
-                if(clubPlayerUseCase.unbindPlayerWithClub(playerEntityOptional.get(), clubEntityOptional.get())) {
-                    return Response.ok().build();
-                } else {
-                    return Response.status(Response.Status.FORBIDDEN).entity(new Error("Requested player is not bound to requested club")).build();
-                }
+                clubPlayerUseCase.unbindPlayerWithClub(playerEntityOptional.get(), clubEntityOptional.get());
+                return Response.noContent().build();
             } else {
                 return notFoundResponseBuilder(new Error("Player has not been found")).build();
             }

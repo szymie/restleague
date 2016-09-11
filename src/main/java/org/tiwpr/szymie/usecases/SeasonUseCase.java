@@ -13,4 +13,11 @@ public class SeasonUseCase {
     public boolean isThereAnySeason() {
         return !seasonDao.findAll(0, 1).isEmpty();
     }
+
+    public boolean isSeasonCompleted(int seasonId) {
+
+        return seasonDao.findById(seasonId)
+                .filter(seasonEntity -> seasonEntity.getStatus().equals("completed"))
+                .isPresent();
+    }
 }

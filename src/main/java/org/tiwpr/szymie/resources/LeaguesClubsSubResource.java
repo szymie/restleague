@@ -45,7 +45,7 @@ public class LeaguesClubsSubResource extends BaseResource {
 
         if(errorOptional.isPresent()) {
             Error error = errorOptional.get();
-            return Response.status(Response.Status.FORBIDDEN).entity(error).build();
+            return Response.status(Response.Status.CONFLICT).entity(error).build();
         } else {
             return Response.ok().build();
         }
@@ -76,15 +76,13 @@ public class LeaguesClubsSubResource extends BaseResource {
             @PathParam("leagueId") int leagueId,
             @PathParam("clubId") int clubId) {
 
-        //są już jakieś rozpoczęte mecze w tym sezonie w tej lidze
+        Optional<Error> errorOptional = clubLeagueSeasonUseCase.unbindClubWithLeagueAtSeason(clubId, leagueId, seasonId);
 
-
-
-        if(clubLeagueSeasonUseCase.isClubBoundWithLeagueAtSeason(clubId, leagueId, seasonId)) {
-            URI clubUri = uriInfo.getBaseUriBuilder().path(ClubsResource.class).path(Integer.toString(clubId)).build();
-            return Response.status(Response.Status.TEMPORARY_REDIRECT).location(clubUri).build();
+        if(errorOptional.isPresent()) {
+            Error error = errorOptional.get();
+            return Response.status(Response.Status.CONFLICT).entity(error).build();
         } else {
-            return notFoundResponseBuilder(new Error("Requested club is not bound to requested league at requested season")).build();
+            return Response.noContent().build();
         }
     }
 }

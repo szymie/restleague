@@ -37,7 +37,7 @@ public class LeaguesResource extends BaseResource {
     }
 
     @GET
-    @Path("{leagueId}")
+    @Path("/{leagueId}")
     @Transactional
     public Response getLeague(@PathParam("leagueId") int id) {
 

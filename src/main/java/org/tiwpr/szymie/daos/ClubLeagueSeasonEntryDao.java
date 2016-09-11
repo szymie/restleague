@@ -69,4 +69,17 @@ public class ClubLeagueSeasonEntryDao {
     public void save(ClubLeagueSeasonEntryEntity entryEntity) {
         entityManager.persist(entryEntity);
     }
+
+    public void deleteByClubIdAndLeagueIdAndSeasonId(int clubId, int leagueId, int seasonId) {
+
+        TypedQuery<ClubLeagueSeasonEntryEntity> query = entityManager.createQuery(
+                "from ClubLeagueSeasonEntryEntity cls where cls.season.id = :season and cls.league.id = :league and cls.club.id = :club",
+                ClubLeagueSeasonEntryEntity.class);
+
+        query.setParameter("season", seasonId);
+        query.setParameter("league", leagueId);
+        query.setParameter("club", clubId);
+
+        query.getResultList().stream().forEach(entityManager::remove);
+    }
 }

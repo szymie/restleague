@@ -108,4 +108,19 @@ public class ClubLeagueSeasonUseCase {
                 .stream()
                 .anyMatch(club -> club.getId() == clubId);
     }
+
+    public Optional<Error> unbindClubWithLeagueAtSeason(int clubId, int leagueId, int seasonId) {
+
+        Optional<Error> errorOptional = validateEntitiesExistence(seasonId, leagueId, clubId);
+
+        if(errorOptional.isPresent()) {
+            return errorOptional;
+        }
+
+        //TODO - są już jakieś rozpoczęte mecze w tym sezonie w tej lidze
+
+        clubLeagueSeasonEntryDao.deleteByClubIdAndLeagueIdAndSeasonId(clubId, leagueId, seasonId);
+
+        return Optional.empty();
+    }
 }
