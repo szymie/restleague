@@ -5,7 +5,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.tiwpr.szymie.daos.SeasonDao;
 import org.tiwpr.szymie.entities.SeasonEntity;
+import org.tiwpr.szymie.models.Error;
 import org.tiwpr.szymie.models.Season;
+import org.tiwpr.szymie.usecases.LeagueUseCase;
+import org.tiwpr.szymie.usecases.SeasonUseCase;
 
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -28,6 +31,10 @@ public class SeasonsResource extends BaseResource {
     private LeaguesClubsSubResource leaguesClubsSubResource;
     @Autowired
     private FixturesSubResource fixturesSubResource;
+    @Autowired
+    private TableSubResource tableSubResource;
+    @Autowired
+    private SeasonUseCase seasonUseCase;
 
     @GET
     @Transactional
@@ -61,8 +68,12 @@ public class SeasonsResource extends BaseResource {
         } else {
 
             if(poeKeyDao.isValid(poeKey)) {
+
                 poeKeyDao.invalidate(poeKey);
+
+                season.setStatus("in progress");
                 int seasonId = seasonDao.save(season);
+
                 URI seasonLocation = uriInfo.getBaseUriBuilder().path(SeasonsResource.class).path(Integer.toString(seasonId)).build();
                 return Response.created(seasonLocation).build();
             } else {
@@ -74,7 +85,7 @@ public class SeasonsResource extends BaseResource {
     @PUT
     @Path("/{seasonId}")
     @Transactional
-    public Response putPLayer(
+    public Response putSeason(
             @HeaderParam(HttpHeaders.IF_UNMODIFIED_SINCE) Timestamp lastModified,
             @PathParam("seasonId") int id,
             @Valid Season season) {
@@ -90,8 +101,7 @@ public class SeasonsResource extends BaseResource {
             Optional<ResponseBuilder> preconditionsResponseBuilderOptional = evaluatePreconditions(lastModified, seasonLastModified);
 
             if(!preconditionsResponseBuilderOptional.isPresent()) {
-                seasonDao.update(season);
-                return Response.ok().build();
+                return updateSeason(season);
             } else {
                 return preconditionsResponseBuilderOptional.get().build();
             }
@@ -101,10 +111,26 @@ public class SeasonsResource extends BaseResource {
         }
     }
 
+    private Response updateSeason(Season season) {
+
+        if(season.getStatus().equals("completed")) {
+            if(!seasonUseCase.areAllLeaguesFinishedAtSeason(season.getId())) {
+                return Response
+                        .status(Response.Status.CONFLICT)
+                        .entity(new Error("Season cannot be marked as completed because there are fixture left to be played"))
+                        .build();
+            }
+        }
+
+        seasonDao.update(season);
+
+        return Response.ok().build();
+    }
+
     @DELETE
     @Path("/{seasonId}")
     @Transactional
-    public Response deletePlayer(@PathParam("seasonId") int id) {
+    public Response deleteSeason(@PathParam("seasonId") int id) {
         seasonDao.delete(id);
         return Response.noContent().build();
     }
@@ -133,5 +159,10 @@ public class SeasonsResource extends BaseResource {
     @Path("/{seasonId}/leagues/{leagueId}/fixtures")
     public FixturesSubResource leagueFixtures() {
         return fixturesSubResource;
+    }
+
+    @Path("/{seasonId}/leagues/{leagueId}/table")
+    public TableSubResource leagueTable() {
+        return tableSubResource;
     }
 }

@@ -2,10 +2,7 @@ package org.tiwpr.szymie.usecases;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.tiwpr.szymie.daos.ClubDao;
-import org.tiwpr.szymie.daos.ClubLeagueSeasonEntryDao;
-import org.tiwpr.szymie.daos.LeagueDao;
-import org.tiwpr.szymie.daos.SeasonDao;
+import org.tiwpr.szymie.daos.*;
 import org.tiwpr.szymie.entities.ClubLeagueSeasonEntryEntity;
 import org.tiwpr.szymie.entities.ClubLeagueSeasonEntryId;
 import org.tiwpr.szymie.entities.LeagueEntity;
@@ -24,6 +21,8 @@ public class ClubLeagueSeasonUseCase {
     private LeagueDao leagueDao;
     @Autowired
     private SeasonDao seasonDao;
+    @Autowired
+    private FixtureDao fixtureDao;
 
     public Optional<Error> bindClubWithLeagueAtSeason(int clubId, int leagueId, int seasonId) {
 
@@ -117,7 +116,9 @@ public class ClubLeagueSeasonUseCase {
             return errorOptional;
         }
 
-        //TODO - są już jakieś rozpoczęte mecze w tym sezonie w tej lidze
+        if(!fixtureDao.findByLeagueIdAndSeasonId(leagueId, seasonId).isEmpty()) {
+            return Optional.of(new Error("There already are played fixtures at requested league on requested season"));
+        }
 
         clubLeagueSeasonEntryDao.deleteByClubIdAndLeagueIdAndSeasonId(clubId, leagueId, seasonId);
 

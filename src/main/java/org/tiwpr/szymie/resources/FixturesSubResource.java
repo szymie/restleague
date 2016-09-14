@@ -3,13 +3,14 @@ package org.tiwpr.szymie.resources;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.tiwpr.szymie.daos.FixturesDao;
+import org.tiwpr.szymie.daos.FixtureDao;
 import org.tiwpr.szymie.entities.FixtureEntity;
 import org.tiwpr.szymie.models.Fixture;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import org.tiwpr.szymie.models.Error;
@@ -23,14 +24,17 @@ import static javax.ws.rs.core.Response.ResponseBuilder;
 public class FixturesSubResource extends BaseResource {
 
     @Autowired
-    private FixturesDao fixturesDao;
+    private FixtureDao fixtureDao;
     @Autowired
     private FixtureUseCase fixtureUseCase;
 
     @GET
     @Transactional
-    public List<Fixture> getFixtures(@BeanParam PaginationFilter paginationFilter) {
-        return fixturesDao.findAll(paginationFilter.getOffset(), paginationFilter.getLimit());
+    public List<Fixture> getFixtures(
+            @PathParam("seasonId") int seasonId,
+            @PathParam("leagueId") int leagueId,
+            @BeanParam PaginationFilter paginationFilter) {
+        return fixtureDao.findByLeagueIdAndSeasonId(leagueId, seasonId, paginationFilter.getOffset(), paginationFilter.getLimit());
     }
 
     @GET
@@ -40,7 +44,7 @@ public class FixturesSubResource extends BaseResource {
             @PathParam("fixtureId") int id,
             @Context UriInfo uriInfo) {
 
-        Optional<FixtureEntity> fixtureEntityOptional = fixturesDao.findById(id);
+        Optional<FixtureEntity> fixtureEntityOptional = fixtureDao.findById(id);
         Optional<Fixture> fixtureOptional = fixtureEntityOptional.map(FixtureEntity::toModel);
 
         ResponseBuilder responseBuilder = fixtureOptional
@@ -83,6 +87,45 @@ public class FixturesSubResource extends BaseResource {
             } else {
                 return Response.status(Response.Status.METHOD_NOT_ALLOWED).build();
             }
+        }
+    }
+
+    @PUT
+    @Path("/{fixtureId}")
+    @Transactional
+    public Response putFixture(
+            @HeaderParam(HttpHeaders.IF_UNMODIFIED_SINCE) Timestamp lastModified,
+            @PathParam("seasonId") int seasonId,
+            @PathParam("leagueId") int leagueId,
+            @PathParam("fixtureId") int fixtureId,
+            @Valid Fixture fixture) {
+
+        Optional<FixtureEntity> fixtureEntityOptional = fixtureDao.findById(fixtureId);
+
+        if(fixtureEntityOptional.isPresent()) {
+
+            fixture.setId(fixtureId);
+            FixtureEntity fixtureEntity = fixtureEntityOptional.get();
+            Timestamp fixtureLastModified = fixtureEntity.getLastModified();
+
+            Optional<ResponseBuilder> preconditionsResponseBuilderOptional = evaluatePreconditions(lastModified, fixtureLastModified);
+
+            if(!preconditionsResponseBuilderOptional.isPresent()) {
+
+                Optional<Error> errorOptional = fixtureUseCase.updateFixtureFromLeagueAtSeason(fixture, leagueId, seasonId);
+
+                if(!errorOptional.isPresent()) {
+                    return Response.ok().build();
+                } else {
+                    Error error = errorOptional.get();
+                    return Response.status(Response.Status.CONFLICT).entity(error).build();
+                }
+            } else {
+                return preconditionsResponseBuilderOptional.get().build();
+            }
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new Error("Fixture has not been found")).build();
         }
     }
 

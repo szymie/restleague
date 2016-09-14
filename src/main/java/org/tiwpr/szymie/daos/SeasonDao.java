@@ -63,4 +63,15 @@ public class SeasonDao {
     public void delete(int id) {
         findById(id).ifPresent(entityManager::remove);
     }
+
+    public Optional<Season> findLastSeason() {
+
+        TypedQuery<SeasonEntity> query = entityManager.createQuery("from SeasonEntity order by endDate desc", SeasonEntity.class);
+
+        query.setMaxResults(1);
+
+        List<SeasonEntity> list = query.getResultList();
+
+        return list.stream().findFirst().map(SeasonEntity::toModel);
+    }
 }
