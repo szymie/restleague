@@ -74,4 +74,15 @@ public class SeasonDao {
 
         return list.stream().findFirst().map(SeasonEntity::toModel);
     }
+
+    public Optional<Season> findLastCompletedSeason() {
+
+        TypedQuery<SeasonEntity> query = entityManager.createQuery("from SeasonEntity where status = 'completed' order by endDate desc", SeasonEntity.class);
+
+        query.setMaxResults(1);
+
+        List<SeasonEntity> list = query.getResultList();
+
+        return list.stream().findFirst().map(SeasonEntity::toModel);
+    }
 }

@@ -1,19 +1,17 @@
 package org.tiwpr.szymie.resources;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.tiwpr.szymie.daos.ClubDao;
 import org.tiwpr.szymie.daos.TransferDao;
-import org.tiwpr.szymie.entities.ClubEntity;
-import org.tiwpr.szymie.entities.PlayerEntity;
 import org.tiwpr.szymie.entities.TransferEntity;
-import org.tiwpr.szymie.models.Club;
 import org.tiwpr.szymie.models.Error;
 import org.tiwpr.szymie.models.Transfer;
+import org.tiwpr.szymie.tasks.TransferAsyncTask;
 import org.tiwpr.szymie.usecases.ClubPlayerUseCase;
+
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -25,6 +23,7 @@ import static javax.ws.rs.core.Response.*;
 @Path("transfers")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@EnableAsync
 public class TransfersResource extends BaseResource {
 
     @Autowired
@@ -33,6 +32,9 @@ public class TransfersResource extends BaseResource {
     private TransferDao transferDao;
     @Autowired
     private ClubPlayerUseCase clubPlayerUseCase;
+
+    @Autowired
+    private TransferAsyncTask transferAsyncTask;
 
     @GET
     @Path("/{transferId}")
@@ -62,11 +64,10 @@ public class TransfersResource extends BaseResource {
             Error error = errorOptional.get();
             return Response.status(Response.Status.FORBIDDEN).entity(error).build();
         } else {
-            transfer.setStatus("in progress");
-            int transferId = transferDao.save(transfer);
-            transfer.setId(transferId);
 
-            performTransfer(transfer);
+            int transferId = saveTransfer(transfer);
+
+            transferAsyncTask.performTransfer(transfer);
 
             URI locationUri = uriInfo.getBaseUriBuilder().path(TransfersResource.class).path(Integer.toString(transferId)).build();
             return Response.accepted().location(locationUri).build();
@@ -94,25 +95,13 @@ public class TransfersResource extends BaseResource {
         return Optional.empty();
     }
 
-    @Async
-    private void performTransfer(Transfer transfer) {
+    @Transactional
+    private int saveTransfer(Transfer transfer) {
 
-        Optional<TransferEntity> transferEntityOptional = transferDao.findById(transfer.getId());
+        transfer.setStatus("in progress");
+        int transferId = transferDao.save(transfer);
+        transfer.setId(transferId);
 
-        transferEntityOptional.ifPresent(transferEntity -> {
-            PlayerEntity playerEntity = transferEntity.getPlayer();
-            ClubEntity sourceClubEntity = transferEntity.getSourceClub();
-            ClubEntity destinationClubEntity = transferEntity.getDestinationClub();
-
-            clubPlayerUseCase.unbindPlayerWithClub(playerEntity, sourceClubEntity);
-            clubPlayerUseCase.bindPlayerWithClub(playerEntity, destinationClubEntity);
-        });
-
-        transferEntityOptional.orElseThrow(RuntimeException::new);
-
-        transferDao.findById(transfer.getId()).map(transferEntity -> {
-            transferEntity.setStatus("done");
-            return transferEntity;
-        }).ifPresent(transferDao::update);
+        return transferId;
     }
 }

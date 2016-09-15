@@ -1,10 +1,8 @@
 package org.tiwpr.szymie.entities;
 
-import org.tiwpr.szymie.models.Model;
-import org.tiwpr.szymie.models.Result;
 import org.tiwpr.szymie.models.SeasonCreationTask;
-
 import javax.persistence.*;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "season_creation_tasks")
@@ -17,6 +15,8 @@ public class SeasonCreationTaskEntity extends BaseEntity {
     @JoinColumn(name = "season_id")
     private SeasonEntity season;
     private String status;
+    @Column(name = "last_modified")
+    private Timestamp lastModified;
 
     public int getId() {
         return id;
@@ -40,6 +40,14 @@ public class SeasonCreationTaskEntity extends BaseEntity {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Timestamp getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(Timestamp lastModified) {
+        this.lastModified = lastModified;
     }
 
     @Override

@@ -39,17 +39,17 @@ public class TableSubResource extends BaseResource {
     public Response getTable(@PathParam("seasonId") int seasonId, @PathParam("leagueId") int leagueId) {
 
         Optional<SeasonEntity> seasonEntityOptional = seasonDao.findById(seasonId);
-        Optional<LeagueEntity> leagueEntityOptional = leagueDao.findById(leagueId);
+        Optional<League> leagueOptional = leagueDao.findById(leagueId).map(LeagueEntity::toModel);
 
         if(!seasonEntityOptional.isPresent()) {
             return notFoundResponseBuilder(new Error("Season has not been found")).build();
         }
 
-        if(!leagueEntityOptional.isPresent()) {
+        if(!leagueOptional.isPresent()) {
             return notFoundResponseBuilder(new Error("League has not been found")).build();
         }
 
-        Table table = tableUseCase.getTableForLeagueAtSeason(leagueEntityOptional.get(), leagueId, seasonId);
+        Table table = tableUseCase.getTableForLeagueAtSeason(leagueOptional.get(), leagueId, seasonId);
 
         return Response.ok().entity(table).build();
     }

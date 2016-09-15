@@ -4,13 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.tiwpr.szymie.daos.ClubDao;
 import org.tiwpr.szymie.daos.FixtureDao;
-import org.tiwpr.szymie.daos.LeagueDao;
-import org.tiwpr.szymie.daos.SeasonDao;
-import org.tiwpr.szymie.entities.LeagueEntity;
-import org.tiwpr.szymie.models.Club;
-import org.tiwpr.szymie.models.Fixture;
-import org.tiwpr.szymie.models.Table;
-import org.tiwpr.szymie.models.TablePosition;
+import org.tiwpr.szymie.models.*;
 import org.tiwpr.szymie.resources.UpdatePositions;
 
 import java.util.List;
@@ -28,7 +22,7 @@ public class TableUseCase {
     private static final short WIN_POINTS = 3;
     private static final short DRAW_POINT = 1;
 
-    public Table getTableForLeagueAtSeason(LeagueEntity leagueEntity, int leagueId, int seasonId) {
+    public Table getTableForLeagueAtSeason(League league, int leagueId, int seasonId) {
 
         Map<Integer, TablePosition> positions = clubDao.findBySeasonIdAndLeagueId(seasonId, leagueId).stream()
                 .collect(Collectors.toMap(Club::getId, TablePosition::fromClub));
@@ -43,7 +37,7 @@ public class TableUseCase {
 
         fillTablePositionsWithRanks(tablePositions);
 
-        return createTable(leagueEntity, fixtures, tablePositions);
+        return createTable(league, fixtures, tablePositions);
     }
 
     private void settleGame(
@@ -127,9 +121,9 @@ public class TableUseCase {
         tablePosition.goalsAgainst += fixture.getResult().getGoalsAwayClub();
     }
 
-    private Table createTable(LeagueEntity leagueEntity, List<Fixture> fixtures, List<TablePosition> tablePositions) {
+    private Table createTable(League league, List<Fixture> fixtures, List<TablePosition> tablePositions) {
 
-        String leagueFullName = leagueEntity.getFullName();
+        String leagueFullName = league.getFullName();
         int matchDay = fixtures.stream().mapToInt(Fixture::getMatchDay).max().orElse(0);
 
         return new Table(leagueFullName, matchDay, tablePositions);

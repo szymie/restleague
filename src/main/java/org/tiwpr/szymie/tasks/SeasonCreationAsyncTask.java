@@ -1,13 +1,10 @@
-package org.tiwpr.szymie.usecases;
+package org.tiwpr.szymie.tasks;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.tiwpr.szymie.daos.LeagueDao;
-import org.tiwpr.szymie.daos.SeasonCreationTaskDao;
-import org.tiwpr.szymie.daos.SeasonDao;
-import org.tiwpr.szymie.models.*;
-import org.tiwpr.szymie.models.Error;
-import org.tiwpr.szymie.resources.SaveResult;
+import org.tiwpr.szymie.models.League;
+import org.tiwpr.szymie.models.Season;
+import org.tiwpr.szymie.models.Table;
+import org.tiwpr.szymie.models.TablePosition;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,53 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Component
-public class SeasonCreationTaskUseCase {
-
-    @Autowired
-    private TableUseCase tableUseCase;
-    @Autowired
-    private SeasonUseCase seasonUseCase;
-    @Autowired
-    private SeasonDao seasonDao;
-    @Autowired
-    private LeagueDao leagueDao;
-    @Autowired
-    private SeasonCreationTaskDao seasonCreationTaskDao;
-    @Autowired
-    private ClubLeagueSeasonUseCase clubLeagueSeasonUseCase;
-
-    public SaveResult addSeasonCreationTask(Season season) {
-
-        Optional<Error> errorOptional = validate(season);
-
-        if(errorOptional.isPresent()) {
-            return new SaveResult(errorOptional.get());
-        }
-
-        SeasonCreationTask seasonCreationTask = new SeasonCreationTask();
-        seasonCreationTask.setStatus("in progress");
-
-        int seasonCreationTaskId = seasonCreationTaskDao.save(seasonCreationTask);
-
-        createSeason(season, seasonCreationTaskId);
-
-        seasonCreationTaskDao.updateStatusToSuccess(seasonCreationTaskId);
-
-        return new SaveResult(seasonCreationTaskId);
-    }
-
-    private Optional<Error> validate(Season season) {
-
-        if(!seasonUseCase.isLastSeasonCompleted()) {
-            return Optional.of(new Error("Last season is not completed"));
-        }
-
-        if(!seasonCreationTaskDao.findByStatus("in progress").isEmpty()) {
-            return Optional.of(new Error("There is one creation season task in progress"));
-        }
-
-        return Optional.empty();
-    }
+public class SeasonCreationAsyncTask {
 
     private void createSeason(Season season, int seasonCreationTaskId) {
 

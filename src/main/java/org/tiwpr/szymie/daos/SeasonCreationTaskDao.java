@@ -53,12 +53,12 @@ public class SeasonCreationTaskDao {
         seasonDao.findById(seasonCreationTask.getSeasonId()).ifPresent(seasonCreationTaskEntity::setSeason);
     }
 
-    public void updateStatusToDone(int seasonCreationTaskId) {
+    public void updateStatusToSuccess(int seasonCreationTaskId) {
 
         Optional<SeasonCreationTaskEntity> seasonCreationTaskEntityOptional = findById(seasonCreationTaskId);
 
         seasonCreationTaskEntityOptional.ifPresent(seasonCreationTaskEntity -> {
-            seasonCreationTaskEntity.setStatus("done");
+            seasonCreationTaskEntity.setStatus("success");
             entityManager.persist(seasonCreationTaskEntity);
         });
     }
