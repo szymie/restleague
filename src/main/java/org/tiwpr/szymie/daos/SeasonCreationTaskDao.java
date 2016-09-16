@@ -50,7 +50,8 @@ public class SeasonCreationTaskDao {
     }
 
     private void fillPositionForSeasonCreationTask(SeasonCreationTask seasonCreationTask, SeasonCreationTaskEntity seasonCreationTaskEntity) {
-        seasonDao.findById(seasonCreationTask.getSeasonId()).ifPresent(seasonCreationTaskEntity::setSeason);
+        Optional<Integer> seasonIdOptional = Optional.ofNullable(seasonCreationTask.getSeasonId());
+        seasonIdOptional.ifPresent(seasonId ->seasonDao.findById(seasonId).ifPresent(seasonCreationTaskEntity::setSeason));
     }
 
     public void updateStatusToSuccess(int seasonCreationTaskId) {

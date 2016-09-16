@@ -3,11 +3,15 @@ package org.tiwpr.szymie.resources;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tiwpr.szymie.daos.PoeKeyDao;
+import org.tiwpr.szymie.models.Link;
+import org.tiwpr.szymie.models.ModelWithLinks;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class BaseResource {
@@ -42,5 +46,51 @@ public class BaseResource {
 
     private boolean arePreconditionsMatched(Timestamp sentLastModified, Timestamp lastModified) {
         return sentLastModified.compareTo(lastModified) == 0;
+    }
+
+    protected <T> void fillModelWithLinks(ModelWithLinks<List<T>> modelWithLinks, List<T> entities, long numberOfAllEntities, UriInfo uriInfo, PaginationFilter paginationFilter) {
+
+        PaginationFilter prev = calculatePrevOffsetAndLimit(paginationFilter);
+        PaginationFilter next = calculateNextOffsetAndLimit(paginationFilter);
+
+        List<Link> links = new ArrayList<>();
+
+        links.add(new Link("self", uriInfo.getAbsolutePath().toASCIIString()));
+
+        if(prev.getLimit() != 0) {
+            links.add(new Link("prev", uriInfo.getAbsolutePathBuilder()
+                    .queryParam("offset", prev.getOffset())
+                    .queryParam("limit", prev.getLimit()).build().toASCIIString()));
+        }
+
+        if(numberOfAllEntities > next.getOffset() + next.getLimit()) {
+            links.add(new Link("next", uriInfo.getAbsolutePathBuilder()
+                    .queryParam("offset", next.getOffset())
+                    .queryParam("limit", next.getLimit()).build().toASCIIString()));
+        }
+
+        modelWithLinks.setContent(entities);
+        modelWithLinks.setLinks(links);
+    }
+
+    private PaginationFilter calculatePrevOffsetAndLimit(PaginationFilter paginationFilter) {
+
+        int offset = paginationFilter.getOffset();
+        int limit = paginationFilter.getLimit();
+
+        int prevOffset = Math.max(offset - limit, 0);
+        int prevLimit = Math.min(offset, limit);
+
+        return new PaginationFilter(prevOffset, prevLimit);
+    }
+
+    private PaginationFilter calculateNextOffsetAndLimit(PaginationFilter paginationFilter) {
+
+        int offset = paginationFilter.getOffset();
+        int limit = paginationFilter.getLimit();
+
+        int nextOffset = offset + limit;
+
+        return new PaginationFilter(nextOffset, limit);
     }
 }

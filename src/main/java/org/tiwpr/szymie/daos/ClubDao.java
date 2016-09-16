@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
-public class ClubDao {
+public class ClubDao extends BaseDao {
 
     @PersistenceContext
     private EntityManager entityManager;

@@ -56,7 +56,7 @@ public class SeasonCreationTaskEntity extends BaseEntity {
         SeasonCreationTask seasonCreationTask = new SeasonCreationTask();
 
         seasonCreationTask.setId(id);
-        seasonCreationTask.setSeasonId(season.getId());
+        seasonCreationTask.setSeasonId(season != null ? season.getId() : null);
         seasonCreationTask.setStatus(status);
 
         return seasonCreationTask;

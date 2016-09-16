@@ -6,16 +6,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.tiwpr.szymie.daos.PlayerDao;
 import org.tiwpr.szymie.entities.PlayerEntity;
 import org.tiwpr.szymie.models.Error;
+import org.tiwpr.szymie.models.ModelWithLinks;
 import org.tiwpr.szymie.models.Player;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static javax.ws.rs.core.Response.ResponseBuilder;
+import org.tiwpr.szymie.models.Link;
 
 @Component
 @Path("players")
@@ -28,8 +29,14 @@ public class PlayersResource extends BaseResource {
 
     @GET
     @Transactional
-    public List<Player> getPlayers(@BeanParam PaginationFilter paginationFilter) {
-        return playerDao.findAll(paginationFilter.getOffset(), paginationFilter.getLimit());
+    public ModelWithLinks<List<Player>> getPlayers(@Context UriInfo uriInfo, @BeanParam PaginationFilter paginationFilter) {
+
+        List<Player> players = playerDao.findAll(paginationFilter.getOffset(), paginationFilter.getLimit());
+
+        ModelWithLinks<List<Player>> modelWithLinks = new ModelWithLinks<>();
+        fillModelWithLinks(modelWithLinks, players, playerDao.countAll(), uriInfo, paginationFilter);
+
+        return modelWithLinks;
     }
 
     @GET

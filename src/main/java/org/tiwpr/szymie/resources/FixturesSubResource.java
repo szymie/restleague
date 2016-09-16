@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import org.tiwpr.szymie.models.Error;
+import org.tiwpr.szymie.models.ModelWithLinks;
 import org.tiwpr.szymie.usecases.FixtureUseCase;
 import static javax.ws.rs.core.Response.ResponseBuilder;
 
@@ -30,11 +31,18 @@ public class FixturesSubResource extends BaseResource {
 
     @GET
     @Transactional
-    public List<Fixture> getFixtures(
+    public ModelWithLinks<List<Fixture>> getFixtures(
+            @Context UriInfo uriInfo,
             @PathParam("seasonId") int seasonId,
             @PathParam("leagueId") int leagueId,
             @BeanParam PaginationFilter paginationFilter) {
-        return fixtureDao.findByLeagueIdAndSeasonId(leagueId, seasonId, paginationFilter.getOffset(), paginationFilter.getLimit());
+
+        List<Fixture> clubs = fixtureDao.findByLeagueIdAndSeasonId(leagueId, seasonId, paginationFilter.getOffset(), paginationFilter.getLimit());
+
+        ModelWithLinks<List<Fixture>> modelWithLinks = new ModelWithLinks<>();
+        fillModelWithLinks(modelWithLinks, clubs, fixtureDao.countAll(), uriInfo, paginationFilter);
+
+        return modelWithLinks;
     }
 
     @GET

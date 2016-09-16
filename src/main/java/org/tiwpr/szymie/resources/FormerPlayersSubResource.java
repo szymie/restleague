@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.tiwpr.szymie.daos.PlayerDao;
 import org.tiwpr.szymie.models.Error;
+import org.tiwpr.szymie.models.ModelWithLinks;
 import org.tiwpr.szymie.models.Player;
 import org.tiwpr.szymie.usecases.ClubPlayerUseCase;
 
@@ -31,8 +32,14 @@ public class FormerPlayersSubResource extends BaseResource {
 
     @GET
     @Transactional
-    public List<Player> getPlayers(@PathParam("clubId") int clubId, @BeanParam PaginationFilter paginationFilter) {
-        return playerDao.findNotValidByClubId(clubId, paginationFilter.getOffset(), paginationFilter.getLimit());
+    public ModelWithLinks<List<Player>> getPlayers(@Context UriInfo uriInfo, @PathParam("clubId") int clubId, @BeanParam PaginationFilter paginationFilter) {
+
+        List<Player> players = playerDao.findNotValidByClubId(clubId, paginationFilter.getOffset(), paginationFilter.getLimit());
+
+        ModelWithLinks<List<Player>> modelWithLinks = new ModelWithLinks<>();
+        fillModelWithLinks(modelWithLinks, players, playerDao.countAll(), uriInfo, paginationFilter);
+
+        return modelWithLinks;
     }
 
     @GET

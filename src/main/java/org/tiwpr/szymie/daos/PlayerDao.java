@@ -10,15 +10,16 @@ import org.tiwpr.szymie.models.Player;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
-public class PlayerDao {
+public class PlayerDao extends BaseDao {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+
     @Autowired
     private PositionDao positionDao;
     @Autowired

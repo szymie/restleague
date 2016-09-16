@@ -3,19 +3,19 @@ package org.tiwpr.szymie.models;
 public class SeasonCreationTask implements Model {
 
     private int id;
-    private int seasonId;
+    private Integer seasonId;
     private String status;
 
     public SeasonCreationTask() {
     }
 
-    public SeasonCreationTask(int id, int seasonId, String status) {
+    public SeasonCreationTask(int id, Integer seasonId, String status) {
         this.id = id;
         this.seasonId = seasonId;
         this.status = status;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -23,11 +23,11 @@ public class SeasonCreationTask implements Model {
         this.id = id;
     }
 
-    public int getSeasonId() {
+    public Integer getSeasonId() {
         return seasonId;
     }
 
-    public void setSeasonId(int seasonId) {
+    public void setSeasonId(Integer seasonId) {
         this.seasonId = seasonId;
     }
 

@@ -6,6 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.tiwpr.szymie.daos.ClubDao;
 import org.tiwpr.szymie.entities.ClubEntity;
 import org.tiwpr.szymie.models.Club;
+import org.tiwpr.szymie.models.ModelWithLinks;
+import org.tiwpr.szymie.models.Player;
+
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -30,8 +33,14 @@ public class ClubsResource extends BaseResource {
 
     @GET
     @Transactional
-    public List<Club> getClubs(@BeanParam PaginationFilter paginationFilter) {
-        return clubDao.findAll(paginationFilter.getOffset(), paginationFilter.getLimit());
+    public ModelWithLinks<List<Club>> getClubs(@Context UriInfo uriInfo, @BeanParam PaginationFilter paginationFilter) {
+
+        List<Club> clubs = clubDao.findAll(paginationFilter.getOffset(), paginationFilter.getLimit());
+
+        ModelWithLinks<List<Club>> modelWithLinks = new ModelWithLinks<>();
+        fillModelWithLinks(modelWithLinks, clubs, clubDao.countAll(), uriInfo, paginationFilter);
+
+        return modelWithLinks;
     }
 
     @GET

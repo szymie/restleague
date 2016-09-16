@@ -1,10 +1,19 @@
 package org.tiwpr.szymie.tasks;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.tiwpr.szymie.daos.LeagueDao;
+import org.tiwpr.szymie.daos.SeasonCreationTaskDao;
+import org.tiwpr.szymie.daos.SeasonDao;
 import org.tiwpr.szymie.models.League;
 import org.tiwpr.szymie.models.Season;
 import org.tiwpr.szymie.models.Table;
 import org.tiwpr.szymie.models.TablePosition;
+import org.tiwpr.szymie.usecases.ClubLeagueSeasonUseCase;
+import org.tiwpr.szymie.usecases.SeasonUseCase;
+import org.tiwpr.szymie.usecases.TableUseCase;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +24,22 @@ import java.util.stream.IntStream;
 @Component
 public class SeasonCreationAsyncTask {
 
-    private void createSeason(Season season, int seasonCreationTaskId) {
+    @Autowired
+    private TableUseCase tableUseCase;
+    @Autowired
+    private SeasonDao seasonDao;
+    @Autowired
+    private LeagueDao leagueDao;
+    @Autowired
+    private SeasonCreationTaskDao seasonCreationTaskDao;
+    @Autowired
+    private ClubLeagueSeasonUseCase clubLeagueSeasonUseCase;
+
+    @Async
+    @Transactional
+    public void createSeason(Season season, int seasonCreationTaskId) {
+
+        delay(40000);
 
         season.setStatus("in progress");
         int seasonId = seasonDao.save(season);
@@ -49,6 +73,17 @@ public class SeasonCreationAsyncTask {
         });
 
         seasonCreationTaskDao.updateSeasonId(seasonCreationTaskId, seasonId);
+        seasonCreationTaskDao.updateStatusToSuccess(seasonCreationTaskId);
+    }
+
+    private void delay(long milliseconds) {
+
+        try {
+            Thread.sleep(milliseconds);
+            System.err.println("delay exit");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean isAtPosition(int[] promotionPositions, TablePosition tablePosition) {

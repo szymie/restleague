@@ -32,7 +32,6 @@ public class TransfersResource extends BaseResource {
     private TransferDao transferDao;
     @Autowired
     private ClubPlayerUseCase clubPlayerUseCase;
-
     @Autowired
     private TransferAsyncTask transferAsyncTask;
 

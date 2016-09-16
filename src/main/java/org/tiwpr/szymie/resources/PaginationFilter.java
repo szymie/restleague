@@ -15,6 +15,14 @@ public class PaginationFilter {
     @DefaultValue("10")
     private int limit;
 
+    public PaginationFilter() {
+    }
+
+    public PaginationFilter(int offset, int limit) {
+        this.offset = offset;
+        this.limit = limit;
+    }
+
     public int getOffset() {
         return offset;
     }
