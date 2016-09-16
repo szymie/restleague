@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.tiwpr.szymie.daos.SeasonDao;
 import org.tiwpr.szymie.entities.SeasonEntity;
 import org.tiwpr.szymie.models.Error;
+import org.tiwpr.szymie.models.ModelWithLinks;
 import org.tiwpr.szymie.models.Season;
 import org.tiwpr.szymie.usecases.LeagueUseCase;
 import org.tiwpr.szymie.usecases.SeasonUseCase;
@@ -38,8 +39,15 @@ public class SeasonsResource extends BaseResource {
 
     @GET
     @Transactional
-    public List<Season> getSeasons(@BeanParam PaginationFilter paginationFilter) {
-        return seasonDao.findAll(paginationFilter.getOffset(), paginationFilter.getLimit());
+    public ModelWithLinks<List<Season>> getSeasons(@Context UriInfo uriInfo, @BeanParam PaginationFilter paginationFilter) {
+
+        List<Season> seasons = seasonDao.findAll();
+        List<Season> subSeasons = seasons.subList(paginationFilter.getOffset(), paginationFilter.getLimit());
+
+        ModelWithLinks<List<Season>> modelWithLinks = new ModelWithLinks<>();
+        fillModelWithLinks(modelWithLinks, subSeasons, seasons.size(), uriInfo, paginationFilter);
+
+        return modelWithLinks;
     }
 
     @GET

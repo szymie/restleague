@@ -39,8 +39,10 @@ public class FixturesSubResource extends BaseResource {
 
         List<Fixture> clubs = fixtureDao.findByLeagueIdAndSeasonId(leagueId, seasonId, paginationFilter.getOffset(), paginationFilter.getLimit());
 
+        int numberOfAllEntities = fixtureDao.findByLeagueIdAndSeasonId(leagueId, seasonId).size();
+
         ModelWithLinks<List<Fixture>> modelWithLinks = new ModelWithLinks<>();
-        fillModelWithLinks(modelWithLinks, clubs, fixtureDao.countAll(), uriInfo, paginationFilter);
+        fillModelWithLinks(modelWithLinks, clubs, numberOfAllEntities, uriInfo, paginationFilter);
 
         return modelWithLinks;
     }

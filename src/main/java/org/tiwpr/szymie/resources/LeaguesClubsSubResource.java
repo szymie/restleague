@@ -7,6 +7,7 @@ import org.tiwpr.szymie.daos.ClubLeagueSeasonEntryDao;
 import org.tiwpr.szymie.models.Club;
 import org.tiwpr.szymie.models.ClubId;
 import org.tiwpr.szymie.models.Error;
+import org.tiwpr.szymie.models.ModelWithLinks;
 import org.tiwpr.szymie.usecases.ClubLeagueSeasonUseCase;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -30,11 +31,19 @@ public class LeaguesClubsSubResource extends BaseResource {
 
     @GET
     @Transactional
-    public List<Club> getLeaguesClubs(
+    public ModelWithLinks<List<Club>> getLeaguesClubs(
+            @Context UriInfo uriInfo,
             @PathParam("seasonId") int seasonId,
             @PathParam("leagueId") int leagueId,
             @BeanParam PaginationFilter paginationFilter) {
-        return clubLeagueSeasonEntryDao.findBySeasonIdAndLeagueId(seasonId, leagueId, paginationFilter.getOffset(), paginationFilter.getLimit());
+
+        List<Club> clubs = clubLeagueSeasonEntryDao.findBySeasonIdAndLeagueId(seasonId, leagueId);
+        List<Club> subClubs = clubs.subList(paginationFilter.getOffset(), paginationFilter.getLimit());
+
+        ModelWithLinks<List<Club>> modelWithLinks = new ModelWithLinks<>();
+        fillModelWithLinks(modelWithLinks, subClubs, clubs.size(), uriInfo, paginationFilter);
+
+        return modelWithLinks;
     }
 
     @POST

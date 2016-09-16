@@ -11,6 +11,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class TransferDao {
@@ -25,6 +26,15 @@ public class TransferDao {
     public Optional<TransferEntity> findById(int id) {
         TransferEntity transferEntity = entityManager.find(TransferEntity.class, id);
         return Optional.ofNullable(transferEntity);
+    }
+
+    public List<Transfer> findAll() {
+
+        TypedQuery<TransferEntity> query = entityManager.createQuery("from TransferEntity", TransferEntity.class);
+
+        List<TransferEntity> list = query.getResultList();
+
+        return list.stream().map(TransferEntity::toModel).collect(Collectors.toList());
     }
 
     public int save(Transfer transfer) {

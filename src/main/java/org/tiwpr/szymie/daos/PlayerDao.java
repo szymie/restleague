@@ -34,12 +34,21 @@ public class PlayerDao extends BaseDao {
         return findByClubId(id, true, offset, limit);
     }
 
+    public List<Player> findValidByClubId(int id) {
+        return findByClubId(id, true);
+    }
+
+    public List<Player> findNotValidByClubId(int id, int offset, int limit) {
+        return findByClubId(id, false, offset, limit);
+    }
+
+    public List<Player> findNotValidByClubId(int id) {
+        return findByClubId(id, false);
+    }
+
     private List<Player> findByClubId(int id, boolean valid, int offset, int limit) {
 
-        TypedQuery<PlayerEntity> query = entityManager.createQuery("select distinct m.player from MembershipEntity m where m.club.id = :club and m.valid = :valid", PlayerEntity.class);
-
-        query.setParameter("club", id);
-        query.setParameter("valid", valid);
+        TypedQuery<PlayerEntity> query = createFindByClubIdQuery(id, valid);
 
         query.setFirstResult(offset);
         query.setMaxResults(limit);
@@ -49,8 +58,23 @@ public class PlayerDao extends BaseDao {
         return list.stream().map(PlayerEntity::toModel).collect(Collectors.toList());
     }
 
-    public List<Player> findNotValidByClubId(int id, int offset, int limit) {
-        return findByClubId(id, false, offset, limit);
+    private List<Player> findByClubId(int id, boolean valid) {
+
+        TypedQuery<PlayerEntity> query = createFindByClubIdQuery(id, valid);
+
+        List<PlayerEntity> list = query.getResultList();
+
+        return list.stream().map(PlayerEntity::toModel).collect(Collectors.toList());
+    }
+
+    private TypedQuery<PlayerEntity> createFindByClubIdQuery(int id, boolean valid) {
+
+        TypedQuery<PlayerEntity> query = entityManager.createQuery("select distinct m.player from MembershipEntity m where m.club.id = :club and m.valid = :valid", PlayerEntity.class);
+
+        query.setParameter("club", id);
+        query.setParameter("valid", valid);
+
+        return query;
     }
 
     public List<Player> findAll(int offset, int limit) {

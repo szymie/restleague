@@ -8,6 +8,7 @@ import org.tiwpr.szymie.daos.ClubDao;
 import org.tiwpr.szymie.daos.TransferDao;
 import org.tiwpr.szymie.entities.TransferEntity;
 import org.tiwpr.szymie.models.Error;
+import org.tiwpr.szymie.models.ModelWithLinks;
 import org.tiwpr.szymie.models.Transfer;
 import org.tiwpr.szymie.tasks.TransferAsyncTask;
 import org.tiwpr.szymie.usecases.ClubPlayerUseCase;
@@ -16,6 +17,7 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import static javax.ws.rs.core.Response.*;
 
@@ -34,6 +36,19 @@ public class TransfersResource extends BaseResource {
     private ClubPlayerUseCase clubPlayerUseCase;
     @Autowired
     private TransferAsyncTask transferAsyncTask;
+
+    @GET
+    @Transactional
+    public ModelWithLinks<List<Transfer>> getTransfers(@Context UriInfo uriInfo, @BeanParam PaginationFilter paginationFilter) {
+
+        List<Transfer> transfers = transferDao.findAll();
+        List<Transfer> subTransfers = transfers.subList(paginationFilter.getOffset(), paginationFilter.getLimit());
+
+        ModelWithLinks<List<Transfer>> modelWithLinks = new ModelWithLinks<>();
+        fillModelWithLinks(modelWithLinks, subTransfers, transfers.size(), uriInfo, paginationFilter);
+
+        return modelWithLinks;
+    }
 
     @GET
     @Path("/{transferId}")

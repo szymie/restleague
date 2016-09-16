@@ -35,6 +35,15 @@ public class SeasonDao {
         return list.stream().map(SeasonEntity::toModel).collect(Collectors.toList());
     }
 
+    public List<Season> findAll() {
+
+        TypedQuery<SeasonEntity> query = entityManager.createQuery("from SeasonEntity", SeasonEntity.class);
+
+        List<SeasonEntity> list = query.getResultList();
+
+        return list.stream().map(SeasonEntity::toModel).collect(Collectors.toList());
+    }
+
     public int save(Season season) {
         SeasonEntity seasonEntity = SeasonEntity.fromModel(season);
         entityManager.persist(seasonEntity);
