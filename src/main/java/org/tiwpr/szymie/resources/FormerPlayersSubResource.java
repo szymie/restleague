@@ -35,7 +35,7 @@ public class FormerPlayersSubResource extends BaseResource {
     public ModelWithLinks<List<Player>> getPlayers(@Context UriInfo uriInfo, @PathParam("clubId") int clubId, @BeanParam PaginationFilter paginationFilter) {
 
         List<Player> players = playerDao.findNotValidByClubId(clubId);
-        List<Player> subPlayers = players.subList(paginationFilter.getOffset(), paginationFilter.getLimit());
+        List<Player> subPlayers = subList(players, paginationFilter);
         
         ModelWithLinks<List<Player>> modelWithLinks = new ModelWithLinks<>();
         fillModelWithLinks(modelWithLinks, subPlayers, players.size(), uriInfo, paginationFilter);

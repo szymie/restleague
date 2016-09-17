@@ -19,6 +19,8 @@ import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import static javax.ws.rs.core.Response.*;
 
 @Component
@@ -42,7 +44,7 @@ public class TransfersResource extends BaseResource {
     public ModelWithLinks<List<Transfer>> getTransfers(@Context UriInfo uriInfo, @BeanParam PaginationFilter paginationFilter) {
 
         List<Transfer> transfers = transferDao.findAll();
-        List<Transfer> subTransfers = transfers.subList(paginationFilter.getOffset(), paginationFilter.getLimit());
+        List<Transfer> subTransfers = subList(transfers, paginationFilter);
 
         ModelWithLinks<List<Transfer>> modelWithLinks = new ModelWithLinks<>();
         fillModelWithLinks(modelWithLinks, subTransfers, transfers.size(), uriInfo, paginationFilter);

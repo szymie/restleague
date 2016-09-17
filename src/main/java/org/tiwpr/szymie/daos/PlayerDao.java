@@ -19,11 +19,14 @@ import java.util.stream.Collectors;
 @Repository
 public class PlayerDao extends BaseDao {
 
-
     @Autowired
     private PositionDao positionDao;
     @Autowired
     private CountryDao countryDao;
+
+    public long countAll() {
+        return countAll(PlayerEntity.class);
+    }
 
     public Optional<PlayerEntity> findById(int id) {
         PlayerEntity playerEntity = entityManager.find(PlayerEntity.class, id);

@@ -41,7 +41,7 @@ public class PlayersSubResource extends BaseResource {
         playerDao.findValidByClubId(clubId, paginationFilter.getOffset(), paginationFilter.getLimit());
 
         List<Player> players = playerDao.findNotValidByClubId(clubId);
-        List<Player> subPlayers = players.subList(paginationFilter.getOffset(), paginationFilter.getLimit());
+        List<Player> subPlayers = subList(players, paginationFilter);
 
         ModelWithLinks<List<Player>> modelWithLinks = new ModelWithLinks<>();
         fillModelWithLinks(modelWithLinks, subPlayers, playerDao.countAll(), uriInfo, paginationFilter);

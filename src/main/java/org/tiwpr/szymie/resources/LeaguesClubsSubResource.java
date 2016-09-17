@@ -38,7 +38,7 @@ public class LeaguesClubsSubResource extends BaseResource {
             @BeanParam PaginationFilter paginationFilter) {
 
         List<Club> clubs = clubLeagueSeasonEntryDao.findBySeasonIdAndLeagueId(seasonId, leagueId);
-        List<Club> subClubs = clubs.subList(paginationFilter.getOffset(), paginationFilter.getLimit());
+        List<Club> subClubs = subList(clubs, paginationFilter);
 
         ModelWithLinks<List<Club>> modelWithLinks = new ModelWithLinks<>();
         fillModelWithLinks(modelWithLinks, subClubs, clubs.size(), uriInfo, paginationFilter);

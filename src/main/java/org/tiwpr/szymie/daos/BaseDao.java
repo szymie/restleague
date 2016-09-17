@@ -10,10 +10,6 @@ public class BaseDao {
     @PersistenceContext
     protected EntityManager entityManager;
 
-    public long countAll() {
-        return countAll(this.getClass());
-    }
-
     protected <T> long countAll(Class<T> clazz) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);

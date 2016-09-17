@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class BaseResource {
 
@@ -57,17 +58,25 @@ public class BaseResource {
 
         links.add(new Link("self", uriInfo.getAbsolutePath().toASCIIString()));
 
+        links.add(new Link("first", uriInfo.getAbsolutePathBuilder()
+                .queryParam("offset", 0)
+                .queryParam("limit", Math.min(numberOfAllEntities, paginationFilter.getLimit())).build().toASCIIString()));
+
         if(prev.getLimit() != 0) {
             links.add(new Link("prev", uriInfo.getAbsolutePathBuilder()
                     .queryParam("offset", prev.getOffset())
                     .queryParam("limit", prev.getLimit()).build().toASCIIString()));
         }
 
-        if(numberOfAllEntities > next.getOffset() + next.getLimit()) {
+        if(numberOfAllEntities > paginationFilter.getOffset() + paginationFilter.getLimit()) {
             links.add(new Link("next", uriInfo.getAbsolutePathBuilder()
                     .queryParam("offset", next.getOffset())
                     .queryParam("limit", next.getLimit()).build().toASCIIString()));
         }
+
+        links.add(new Link("last", uriInfo.getAbsolutePathBuilder()
+                .queryParam("offset", Math.max(numberOfAllEntities - paginationFilter.getLimit(), 0))
+                .queryParam("limit", Math.min(numberOfAllEntities, paginationFilter.getLimit())).build().toASCIIString()));
 
         modelWithLinks.setContent(entities);
         modelWithLinks.setLinks(links);
@@ -92,5 +101,9 @@ public class BaseResource {
         int nextOffset = offset + limit;
 
         return new PaginationFilter(nextOffset, limit);
+    }
+
+    protected <T> List<T> subList(List<T> list, PaginationFilter paginationFilter) {
+        return list.stream().skip(paginationFilter.getOffset()).limit(paginationFilter.getLimit()).collect(Collectors.toList());
     }
 }

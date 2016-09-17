@@ -3,6 +3,7 @@ package org.tiwpr.szymie.daos;
 import org.springframework.stereotype.Repository;
 import org.tiwpr.szymie.entities.BaseEntity;
 import org.tiwpr.szymie.entities.ClubEntity;
+import org.tiwpr.szymie.entities.PlayerEntity;
 import org.tiwpr.szymie.models.Club;
 
 import javax.persistence.EntityManager;
@@ -17,6 +18,10 @@ public class ClubDao extends BaseDao {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    public long countAll() {
+        return countAll(ClubEntity.class);
+    }
 
     public Optional<ClubEntity> findById(int id) {
         ClubEntity playerEntity = entityManager.find(ClubEntity.class, id);

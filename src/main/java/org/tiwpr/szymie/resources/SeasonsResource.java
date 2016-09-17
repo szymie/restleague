@@ -42,7 +42,7 @@ public class SeasonsResource extends BaseResource {
     public ModelWithLinks<List<Season>> getSeasons(@Context UriInfo uriInfo, @BeanParam PaginationFilter paginationFilter) {
 
         List<Season> seasons = seasonDao.findAll();
-        List<Season> subSeasons = seasons.subList(paginationFilter.getOffset(), paginationFilter.getLimit());
+        List<Season> subSeasons = subList(seasons, paginationFilter);
 
         ModelWithLinks<List<Season>> modelWithLinks = new ModelWithLinks<>();
         fillModelWithLinks(modelWithLinks, subSeasons, seasons.size(), uriInfo, paginationFilter);
