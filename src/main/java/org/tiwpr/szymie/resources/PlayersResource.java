@@ -17,6 +17,7 @@ import java.util.*;
 
 import static javax.ws.rs.core.Response.ResponseBuilder;
 import org.tiwpr.szymie.models.Link;
+import org.tiwpr.szymie.usecases.ClubPlayerUseCase;
 
 @Component
 @Path("players")
@@ -26,6 +27,8 @@ public class PlayersResource extends BaseResource {
 
     @Autowired
     private PlayerDao playerDao;
+    @Autowired
+    private ClubPlayerUseCase clubPlayerUseCase;
 
     @GET
     @Transactional
@@ -71,6 +74,7 @@ public class PlayersResource extends BaseResource {
                 URI playerLocation = uriInfo.getBaseUriBuilder().path(PlayersResource.class).path(Integer.toString(playerId)).build();
                 return Response.created(playerLocation).build();
             } else {
+                //TODO - UNAUTHORIZED
                 return Response.status(Response.Status.METHOD_NOT_ALLOWED).build();
             }
         }
@@ -104,13 +108,20 @@ public class PlayersResource extends BaseResource {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new Error("Player has not been found")).build();
         }
+
+        //wartość ETag zapisywana w DB
     }
 
     @DELETE
     @Path("/{playerId}")
     @Transactional
     public Response deletePlayer(@PathParam("playerId") int id) {
-        playerDao.delete(id);
-        return Response.noContent().build();
+
+        if(clubPlayerUseCase.isPlayerFree(id)) {
+            playerDao.delete(id);
+            return Response.noContent().build();
+        } else {
+            return Response.status(Response.Status.CONFLICT).entity(new Error("Requested player is bound with a club")).build();
+        }
     }
 }

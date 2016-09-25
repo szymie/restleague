@@ -22,7 +22,7 @@ public class SecurityFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext request) throws IOException {
 
-        if(request.getMethod().equals(HttpMethod.POST)) {
+        if(!request.getMethod().equals(HttpMethod.GET)) {
             authenticate(request);
         }
     }
